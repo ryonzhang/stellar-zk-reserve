@@ -1,0 +1,19 @@
+{
+  "name": "zk-reserve-orchestrator",
+  "version": "1.0.0",
+  "description": "ZK actuarial reserve attestation orchestrator for Stellar",
+  "main": "src/index.ts",
+  "scripts": {
+    "prove": "node --loader ts-node/esm src/index.ts",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "Ruiyang Zhang",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@aztec/bb.js": "^4.3.1",
+    "@noir-lang/noir_js": "^1.0.0-beta.22",
+    "@stellar/stellar-sdk": "^16.0.1"
+  }
+}
