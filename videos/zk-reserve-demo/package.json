@@ -1,0 +1,11 @@
+{
+  "name": "zk-reserve-demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes hyperframes@0.6.99 preview",
+    "check": "npx --yes hyperframes@0.6.99 lint && npx --yes hyperframes@0.6.99 validate && npx --yes hyperframes@0.6.99 inspect",
+    "render": "npx --yes hyperframes@0.6.99 render",
+    "audio": "node gen-audio.mjs"
+  }
+}

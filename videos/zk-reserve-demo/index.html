@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=1920, height=1080"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=IBM+Plex+Mono:wght@400;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:1920px; height:1080px; overflow:hidden; background:#050d1a; }
+body { font-family:'Montserrat',sans-serif; }
+
+:root {
+  --bg:    #050d1a;
+  --fg:    #e8eef5;
+  --blue:  #0ea5e9;
+  --gold:  #f5c518;
+  --red:   #ef4444;
+  --dim:   #64748b;
+  --card:  #0c1829;
+  --border:rgba(14,165,233,0.12);
+}
+
+.scene {
+  position:absolute;
+  width:1920px; height:1080px;
+  overflow:hidden;
+  background:var(--bg);
+}
+
+/* ── shared decoratives ── */
+.grid {
+  position:absolute; inset:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(14,165,233,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(14,165,233,0.04) 1px,transparent 1px);
+  background-size:96px 96px;
+}
+.grid::after {
+  content:'';
+  position:absolute; inset:0;
+  background:radial-gradient(ellipse 130% 90% at 50% 50%,transparent 20%,var(--bg) 100%);
+}
+.scanline {
+  position:absolute; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,transparent,rgba(14,165,233,0.35),transparent);
+}
+.corner-tl { position:absolute; top:48px; left:48px; width:48px; height:48px;
+  border-top:2px solid var(--blue); border-left:2px solid var(--blue); opacity:0.5; }
+.corner-br { position:absolute; bottom:48px; right:48px; width:48px; height:48px;
+  border-bottom:2px solid var(--blue); border-right:2px solid var(--blue); opacity:0.5; }
+.side-label {
+  position:absolute; right:48px; top:50%; transform:translateY(-50%) rotate(90deg);
+  font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--dim);
+  letter-spacing:3px; white-space:nowrap; opacity:0.5;
+}
+
+/* ── S1 · Hook ── */
+#s1 { display:flex; align-items:center; justify-content:center; }
+#s1 .glow1 {
+  position:absolute; width:900px; height:900px; border-radius:50%;
+  background:radial-gradient(circle,rgba(14,165,233,0.12) 0%,transparent 70%);
+  top:-200px; left:-200px;
+}
+#s1 .glow2 {
+  position:absolute; width:700px; height:700px; border-radius:50%;
+  background:radial-gradient(circle,rgba(245,197,24,0.07) 0%,transparent 70%);
+  bottom:-100px; right:-100px;
+}
+#s1 .hook-block { text-align:center; position:relative; z-index:2; }
+.h1-num {
+  font-family:'Oswald',sans-serif;
+  font-size:200px; font-weight:700; line-height:0.9;
+  color:var(--fg); letter-spacing:-6px;
+  will-change:transform,opacity;
+}
+.h1-label {
+  font-size:32px; font-weight:400; color:var(--dim);
+  letter-spacing:8px; text-transform:uppercase; margin-top:16px;
+  will-change:opacity;
+}
+.h1-sub {
+  font-size:38px; font-weight:700; color:var(--blue);
+  margin-top:48px; letter-spacing:1px;
+  will-change:opacity,transform;
+}
+#s1 .bottom-bar {
+  position:absolute; bottom:80px; left:120px; right:120px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.meta-tag {
+  font-family:'IBM Plex Mono',monospace; font-size:14px;
+  color:var(--dim); letter-spacing:2px; opacity:0.6;
+}
+
+/* ── S2 · Problem ── */
+#s2 { display:flex; }
+#s2 .left-panel {
+  width:860px; height:1080px;
+  background:rgba(239,68,68,0.04);
+  border-right:2px solid rgba(239,68,68,0.2);
+  display:flex; flex-direction:column; justify-content:center;
+  padding:80px 80px 80px 120px;
+  position:relative;
+}
+#s2 .right-panel {
+  flex:1; height:1080px;
+  display:flex; flex-direction:column; justify-content:center;
+  padding:80px 120px 80px 80px;
+}
+.problem-label {
+  font-family:'IBM Plex Mono',monospace; font-size:16px;
+  color:var(--red); letter-spacing:4px; margin-bottom:32px;
+  will-change:opacity;
+}
+.problem-head {
+  font-size:68px; font-weight:900; line-height:1.05;
+  color:var(--fg); margin-bottom:40px;
+  will-change:transform,opacity;
+}
+.liability-table { display:flex; flex-direction:column; gap:12px; will-change:opacity,transform; }
+.table-row {
+  display:flex; align-items:center; gap:20px;
+  background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.15);
+  border-radius:8px; padding:16px 20px;
+}
+.table-row.blurred { filter:blur(6px); opacity:0.6; }
+.table-col { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--dim); }
+.table-col.name { color:var(--fg); font-size:16px; width:220px; }
+.table-col.val { color:var(--red); font-size:14px; width:140px; }
+.redact {
+  display:inline-block; background:var(--red); border-radius:2px;
+  width:80px; height:14px; opacity:0.7; vertical-align:middle;
+}
+.problem-verdict {
+  margin-top:48px; padding:24px 28px;
+  background:rgba(239,68,68,0.08); border:2px solid var(--red);
+  border-radius:10px; font-size:22px; font-weight:700; color:var(--red);
+  will-change:transform,opacity;
+}
+.solution-label {
+  font-family:'IBM Plex Mono',monospace; font-size:16px;
+  color:var(--blue); letter-spacing:4px; margin-bottom:32px;
+  will-change:opacity;
+}
+.solution-head {
+  font-size:68px; font-weight:900; line-height:1.05;
+  color:var(--fg); margin-bottom:40px;
+  will-change:transform,opacity;
+}
+.solution-list { display:flex; flex-direction:column; gap:18px; }
+.sol-item {
+  display:flex; align-items:flex-start; gap:18px;
+  will-change:opacity,transform;
+}
+.sol-dot { width:10px; height:10px; border-radius:50%; background:var(--blue); margin-top:8px; flex-shrink:0; }
+.sol-text { font-size:24px; color:var(--dim); line-height:1.5; }
+.sol-text strong { color:var(--fg); font-weight:700; }
+
+/* ── S3 · Brand ── */
+#s3 { display:flex; align-items:center; justify-content:center; }
+#s3 .glow-center {
+  position:absolute; width:1000px; height:1000px; border-radius:50%;
+  background:radial-gradient(circle,rgba(14,165,233,0.14) 0%,transparent 65%);
+  top:50%; left:50%; transform:translate(-50%,-50%);
+}
+#s3 .brand-block { text-align:center; position:relative; z-index:2; }
+#s3-wordmark {
+  font-family:'Oswald',sans-serif; font-size:180px; font-weight:700;
+  color:var(--fg); letter-spacing:-4px; line-height:1;
+  will-change:transform,opacity;
+}
+#s3-accent {
+  width:0; height:4px; background:var(--blue); margin:24px auto; border-radius:2px;
+}
+#s3-tag {
+  font-size:32px; font-weight:400; color:var(--blue);
+  letter-spacing:4px; text-transform:uppercase;
+  will-change:opacity,transform;
+}
+#s3-sub {
+  font-size:24px; font-weight:400; color:var(--dim);
+  margin-top:24px; max-width:900px; margin-left:auto; margin-right:auto;
+  will-change:opacity;
+}
+.orbit-ring {
+  position:absolute; border-radius:50%; border:1px solid rgba(14,165,233,0.12);
+  top:50%; left:50%; transform:translate(-50%,-50%);
+}
+
+/* ── S4 · Math ── */
+#s4 { display:flex; }
+#s4 .left-col {
+  width:820px; height:1080px;
+  display:flex; flex-direction:column; justify-content:center;
+  padding:80px 60px 80px 120px;
+}
+#s4 .right-col {
+  flex:1; height:1080px;
+  display:flex; flex-direction:column; justify-content:center;
+  padding:60px 120px 60px 40px;
+}
+.math-label {
+  font-family:'IBM Plex Mono',monospace; font-size:16px;
+  color:var(--gold); letter-spacing:4px; margin-bottom:32px;
+  will-change:opacity;
+}
+.math-head {
+  font-size:64px; font-weight:900; line-height:1.1;
+  color:var(--fg); margin-bottom:48px;
+  will-change:transform,opacity;
+}
+.formula-block {
+  background:var(--card); border:1px solid rgba(245,197,24,0.2);
+  border-radius:12px; padding:40px;
+  font-family:'IBM Plex Mono',monospace;
+  will-change:transform,opacity;
+}
+.formula-top { font-size:18px; color:var(--dim); margin-bottom:16px; letter-spacing:1px; }
+.formula-main {
+  font-size:32px; color:var(--gold); line-height:1.6;
+  font-weight:700;
+}
+.formula-main span.op { color:var(--fg); opacity:0.5; }
+.formula-main span.var { color:var(--blue); }
+.cohort-grid { display:flex; flex-direction:column; gap:10px; }
+.cohort-row {
+  display:flex; align-items:center; gap:0;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:8px; overflow:hidden;
+  will-change:transform,opacity;
+}
+.cohort-name { padding:14px 18px; font-size:16px; color:var(--fg); width:260px; flex-shrink:0; }
+.cohort-prob { padding:14px 18px; font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--blue); width:120px; flex-shrink:0; }
+.cohort-bar-wrap { flex:1; padding:14px 18px 14px 0; }
+.cohort-bar { height:6px; border-radius:3px; background:var(--blue); opacity:0.5; }
+
+/* ── S5 · Circuit ── */
+#s5 { display:flex; }
+#s5 .left-col {
+  width:860px; height:1080px;
+  display:flex; flex-direction:column; justify-content:center;
+  padding:80px 60px 80px 120px;
+}
+#s5 .right-col {
+  flex:1; height:1080px;
+  display:flex; flex-direction:column; justify-content:center; gap:28px;
+  padding:80px 120px 80px 40px;
+}
+.circuit-label {
+  font-family:'IBM Plex Mono',monospace; font-size:16px;
+  color:var(--blue); letter-spacing:4px; margin-bottom:32px;
+  will-change:opacity;
+}
+.circuit-head {
+  font-size:64px; font-weight:900; line-height:1.1; color:var(--fg);
+  margin-bottom:48px; will-change:transform,opacity;
+}
+.code-block {
+  background:#0a1628; border:1px solid rgba(14,165,233,0.18);
+  border-radius:12px; overflow:hidden;
+  will-change:transform,opacity;
+}
+.code-header {
+  display:flex; align-items:center; gap:10px;
+  padding:12px 18px; background:#0d1f36;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.dot { width:12px; height:12px; border-radius:50%; }
+.dot-r { background:#ef4444; } .dot-y { background:#f59e0b; } .dot-g { background:#22c55e; }
+.code-title { font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--dim); margin-left:4px; }
+.code-body {
+  padding:24px 28px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:15px; line-height:1.8; color:#94a3b8;
+}
+.kw { color:#818cf8; } .fn { color:#38bdf8; }
+.str { color:#34d399; } .cm { color:#475569; }
+.proof-badge {
+  display:flex; align-items:center; gap:18px;
+  background:rgba(14,165,233,0.08); border:2px solid var(--blue);
+  border-radius:12px; padding:24px 28px;
+  will-change:transform,opacity;
+}
+.proof-icon { font-size:40px; }
+.proof-text { flex:1; }
+.proof-title { font-size:22px; font-weight:700; color:var(--fg); margin-bottom:6px; }
+.proof-meta { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--blue); }
+
+/* ── S6 · Stellar ── */
+#s6 { display:flex; align-items:center; justify-content:center; }
+#s6 .content-block {
+  width:1920px; padding:80px 120px;
+  display:flex; gap:80px; align-items:center;
+}
+#s6 .left-col { flex:1; }
+#s6 .right-col { width:880px; }
+.stellar-label {
+  font-family:'IBM Plex Mono',monospace; font-size:16px;
+  color:var(--blue); letter-spacing:4px; margin-bottom:32px;
+  will-change:opacity;
+}
+.stellar-head {
+  font-size:68px; font-weight:900; line-height:1.05; color:var(--fg);
+  margin-bottom:24px; will-change:transform,opacity;
+}
+.stellar-sub {
+  font-size:24px; color:var(--dim); line-height:1.55;
+  margin-bottom:40px; will-change:opacity;
+}
+.contract-card {
+  background:var(--card); border:1px solid rgba(14,165,233,0.2);
+  border-radius:12px; padding:28px 32px;
+  will-change:transform,opacity;
+}
+.contract-label { font-size:13px; color:var(--dim); letter-spacing:3px; margin-bottom:10px; }
+.contract-id {
+  font-family:'IBM Plex Mono',monospace; font-size:16px;
+  color:var(--blue); word-break:break-all; line-height:1.6;
+}
+.live-stamp {
+  display:inline-flex; align-items:center; gap:12px;
+  background:rgba(14,165,233,0.08); border:2px solid var(--blue);
+  border-radius:8px; padding:14px 26px; margin-top:28px;
+  font-size:20px; font-weight:700; letter-spacing:3px; color:var(--blue);
+  will-change:transform,opacity;
+}
+.live-dot {
+  width:10px; height:10px; border-radius:50%; background:var(--blue);
+}
+.explorer-frame {
+  background:#0a1628; border:1px solid rgba(14,165,233,0.2);
+  border-radius:12px; overflow:hidden;
+  box-shadow:0 0 80px rgba(14,165,233,0.08);
+  will-change:transform,opacity;
+}
+
+/* ── S7 · On-chain ── */
+#s7 { display:flex; align-items:center; justify-content:center; }
+#s7 .content-block {
+  text-align:center; padding:80px 160px;
+  display:flex; flex-direction:column; align-items:center; gap:40px;
+}
+.onchain-label {
+  font-family:'IBM Plex Mono',monospace; font-size:16px;
+  color:var(--blue); letter-spacing:4px; will-change:opacity;
+}
+.onchain-head {
+  font-size:96px; font-weight:900; line-height:1.05; color:var(--fg);
+  will-change:transform,opacity;
+}
+.onchain-sub {
+  font-size:28px; color:var(--dim); max-width:1200px; line-height:1.55;
+  will-change:opacity;
+}
+.hash-row {
+  display:flex; gap:24px; will-change:transform,opacity;
+}
+.hash-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:10px; padding:24px 28px; flex:1; text-align:left;
+}
+.hash-card-label { font-size:13px; color:var(--dim); letter-spacing:2px; margin-bottom:8px; }
+.hash-card-val {
+  font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--blue);
+  word-break:break-all; line-height:1.5; opacity:0.8;
+}
+
+/* ── S8 · Stats ── */
+#s8 { display:flex; align-items:center; justify-content:center; }
+#s8 .content-block {
+  width:1920px; padding:80px 120px;
+  display:flex; gap:60px; align-items:center;
+}
+#s8 .left-col { flex:1; }
+.stats-label {
+  font-family:'IBM Plex Mono',monospace; font-size:16px;
+  color:var(--gold); letter-spacing:4px; margin-bottom:32px;
+  will-change:opacity;
+}
+.stats-head {
+  font-size:72px; font-weight:900; line-height:1.05; color:var(--fg);
+  margin-bottom:16px; will-change:transform,opacity;
+}
+.stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; will-change:transform,opacity; }
+.stat-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:12px; padding:32px 28px; text-align:center;
+}
+.stat-num {
+  font-family:'Oswald',sans-serif; font-size:80px; font-weight:700;
+  line-height:1; color:var(--blue);
+}
+.stat-num.gold { color:var(--gold); }
+.stat-num.white { color:var(--fg); }
+.stat-unit { font-size:20px; color:var(--dim); margin-top:8px; letter-spacing:2px; }
+#s8 .right-col { width:800px; }
+.tech-stack {
+  display:flex; flex-direction:column; gap:16px;
+  will-change:transform,opacity;
+}
+.tech-row {
+  display:flex; align-items:center; gap:20px;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:10px; padding:20px 24px;
+}
+.tech-icon { font-size:28px; }
+.tech-name { font-size:20px; font-weight:700; color:var(--fg); }
+.tech-desc { font-size:15px; color:var(--dim); margin-top:4px; }
+
+/* ── S9 · Close ── */
+#s9 { display:flex; align-items:center; justify-content:center; }
+#s9 .glow-c {
+  position:absolute; width:1100px; height:1100px; border-radius:50%;
+  background:radial-gradient(circle,rgba(14,165,233,0.10) 0%,transparent 65%);
+  top:50%; left:50%; transform:translate(-50%,-50%);
+}
+#s9 .close-block {
+  text-align:center; position:relative; z-index:2;
+  display:flex; flex-direction:column; align-items:center; gap:28px;
+}
+#s9-logo {
+  font-family:'Oswald',sans-serif; font-size:196px; font-weight:700;
+  color:var(--fg); letter-spacing:-6px; line-height:1;
+  will-change:transform,opacity;
+}
+#s9-tag {
+  font-size:32px; font-weight:400; color:var(--fg);
+  max-width:1200px; line-height:1.55;
+  will-change:opacity;
+}
+#s9-sub {
+  font-size:20px; color:var(--dim); letter-spacing:3px;
+  will-change:opacity;
+}
+#s9-badge {
+  display:inline-flex; align-items:center; gap:14px;
+  background:rgba(245,197,24,0.08); border:2px solid var(--gold);
+  border-radius:12px; padding:18px 36px;
+  font-size:20px; font-weight:700; letter-spacing:2px; color:var(--gold);
+  will-change:transform,opacity;
+}
+</style>
+</head>
+<body>
+
+<div
+  id="root"
+  data-composition-id="zk-reserve-demo"
+  data-start="0"
+  data-width="1920"
+  data-height="1080"
+  data-duration="92"
+  data-fps="30"
+  style="position:relative;width:1920px;height:1080px;overflow:hidden;background:#050d1a"
+>
+
+<!-- ══ AUDIO ════════════════════════════════════════════ -->
+<audio id="a-s1" class="clip" data-track-index="1" data-start="0"    data-duration="4.5"  src="./audio/s1_hook.mp3"></audio>
+<audio id="a-s2" class="clip" data-track-index="1" data-start="5"    data-duration="11"   src="./audio/s2_problem.mp3"></audio>
+<audio id="a-s3" class="clip" data-track-index="1" data-start="17"   data-duration="9"    src="./audio/s3_solution.mp3"></audio>
+<audio id="a-s4" class="clip" data-track-index="1" data-start="27"   data-duration="11"   src="./audio/s4_math.mp3"></audio>
+<audio id="a-s5" class="clip" data-track-index="1" data-start="39"   data-duration="10"   src="./audio/s5_noir.mp3"></audio>
+<audio id="a-s6" class="clip" data-track-index="1" data-start="50"   data-duration="12"   src="./audio/s6_stellar.mp3"></audio>
+<audio id="a-s7" class="clip" data-track-index="1" data-start="63"   data-duration="8"    src="./audio/s7_onchain.mp3"></audio>
+<audio id="a-s8" class="clip" data-track-index="1" data-start="72"   data-duration="8"    src="./audio/s8_stats.mp3"></audio>
+<audio id="a-s9" class="clip" data-track-index="1" data-start="81"   data-duration="9"    src="./audio/s9_close.mp3"></audio>
+
+<!-- ══ SCENES ════════════════════════════════════════════ -->
+
+<!-- S1 · Hook · 0–5s -->
+<div id="s1" class="clip scene" data-track-index="0" data-start="0" data-duration="5">
+  <div class="grid"></div>
+  <div id="s1-glow1" class="glow1"></div>
+  <div id="s1-glow2" class="glow2"></div>
+  <div class="corner-tl"></div>
+  <div class="corner-br"></div>
+  <div class="side-label">ZK RESERVE · STELLAR HACKS 2026</div>
+  <div id="s1-scanline" class="scanline" style="top:540px"></div>
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+    <div class="hook-block">
+      <div id="s1-num" class="h1-num">$7T</div>
+      <div id="s1-label" class="h1-label">Insurance Reserves · Worldwide</div>
+      <div id="s1-sub" class="h1-sub">Proven by handing over everything.</div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <span class="meta-tag">ACTUARIAL · ZK · STELLAR</span>
+    <span class="meta-tag">DEMO v1.0</span>
+  </div>
+</div>
+
+<!-- S2 · Problem + Solution split · 5–17s -->
+<div id="s2" class="clip scene" data-track-index="0" data-start="5" data-duration="12">
+  <div class="grid"></div>
+  <div class="corner-tl"></div>
+  <div class="corner-br"></div>
+  <!-- left: problem -->
+  <div class="left-panel">
+    <div id="s2-plabel" class="problem-label">THE PROBLEM</div>
+    <div id="s2-phead" class="problem-head">Full exposure<br>every audit.</div>
+    <div id="s2-table" class="liability-table">
+      <div class="table-row">
+        <span class="table-col name">Term Life 30–39</span>
+        <span class="table-col val">$500,000</span>
+        <span class="table-col"><span class="redact"></span></span>
+      </div>
+      <div class="table-row blurred">
+        <span class="table-col name">Whole Life 40–49</span>
+        <span class="table-col val"><span class="redact"></span></span>
+        <span class="table-col"><span class="redact"></span></span>
+      </div>
+      <div class="table-row blurred">
+        <span class="table-col name">Annuity Pool A</span>
+        <span class="table-col val"><span class="redact"></span></span>
+        <span class="table-col"><span class="redact"></span></span>
+      </div>
+      <div class="table-row blurred">
+        <span class="table-col name">Critical Illness</span>
+        <span class="table-col val"><span class="redact"></span></span>
+        <span class="table-col"><span class="redact"></span></span>
+      </div>
+    </div>
+    <div id="s2-verdict" class="problem-verdict">🔓 All data exposed to regulator</div>
+  </div>
+  <!-- right: contrast -->
+  <div class="right-panel">
+    <div id="s2-slabel" class="solution-label">WITH ZK RESERVE</div>
+    <div id="s2-shead" class="solution-head">Prove it.<br>Hide it.</div>
+    <div class="solution-list">
+      <div id="s2-i1" class="sol-item">
+        <div class="sol-dot"></div>
+        <div class="sol-text"><strong>Regulators</strong> get cryptographic certainty</div>
+      </div>
+      <div id="s2-i2" class="sol-item">
+        <div class="sol-dot"></div>
+        <div class="sol-text"><strong>Liability table</strong> stays private</div>
+      </div>
+      <div id="s2-i3" class="sol-item">
+        <div class="sol-dot"></div>
+        <div class="sol-text"><strong>On-chain attestation</strong> — auditable forever</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S3 · Brand · 17–27s -->
+<div id="s3" class="clip scene" data-track-index="0" data-start="17" data-duration="10">
+  <div class="grid"></div>
+  <div class="glow-center"></div>
+  <div class="corner-tl"></div>
+  <div class="corner-br"></div>
+  <div id="s3-ring1" class="orbit-ring" style="width:700px;height:700px"></div>
+  <div id="s3-ring2" class="orbit-ring" style="width:500px;height:500px"></div>
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+    <div class="brand-block">
+      <div id="s3-wordmark">ZK RESERVE</div>
+      <div id="s3-accent"></div>
+      <div id="s3-tag">Actuarial · Zero Knowledge · Stellar</div>
+      <div id="s3-sub">Prove your vault is solvent. Reveal nothing about your liabilities.</div>
+    </div>
+  </div>
+  <div class="bottom-bar" style="position:absolute;bottom:80px;left:120px;right:120px;display:flex;justify-content:space-between">
+    <span class="meta-tag">OPEN SOURCE · github.com/ryonzhang/stellar-zk-reserve</span>
+    <span class="meta-tag">STELLAR TESTNET · DEPLOYED</span>
+  </div>
+</div>
+
+<!-- S4 · Math · 27–39s -->
+<div id="s4" class="clip scene" data-track-index="0" data-start="27" data-duration="12">
+  <div class="grid"></div>
+  <div class="corner-tl"></div>
+  <div class="corner-br"></div>
+  <div class="left-col">
+    <div id="s4-label" class="math-label">THE CIRCUIT</div>
+    <div id="s4-head" class="math-head">Actuarial EPV<br>in zero knowledge.</div>
+    <div id="s4-formula" class="formula-block">
+      <div class="formula-top">// Expected Present Value of Claims</div>
+      <div class="formula-main">
+        EPV <span class="op">=</span> Σᵢ <span class="op">[</span><br>
+        &nbsp;&nbsp;<span class="var">bᵢ</span> <span class="op">×</span> <span class="var">P(claimᵢ)</span><br>
+        &nbsp;&nbsp;<span class="op">×</span> <span class="var">(1+r)⁻ᵗⁱ</span><br>
+        <span class="op">]</span>
+      </div>
+    </div>
+  </div>
+  <div class="right-col">
+    <div class="cohort-grid">
+      <div id="c1" class="cohort-row"><span class="cohort-name">Term Life 30–39</span><span class="cohort-prob">0.15%</span><div class="cohort-bar-wrap"><div class="cohort-bar" style="width:15%"></div></div></div>
+      <div id="c2" class="cohort-row"><span class="cohort-name">Term Life 40–49</span><span class="cohort-prob">0.35%</span><div class="cohort-bar-wrap"><div class="cohort-bar" style="width:35%"></div></div></div>
+      <div id="c3" class="cohort-row"><span class="cohort-name">Term Life 50–59</span><span class="cohort-prob">0.80%</span><div class="cohort-bar-wrap"><div class="cohort-bar" style="width:80%"></div></div></div>
+      <div id="c4" class="cohort-row"><span class="cohort-name">Whole Life 30–39</span><span class="cohort-prob">0.20%</span><div class="cohort-bar-wrap"><div class="cohort-bar" style="width:20%"></div></div></div>
+      <div id="c5" class="cohort-row"><span class="cohort-name">Whole Life 40–49</span><span class="cohort-prob">0.45%</span><div class="cohort-bar-wrap"><div class="cohort-bar" style="width:45%"></div></div></div>
+      <div id="c6" class="cohort-row"><span class="cohort-name">Critical Illness</span><span class="cohort-prob">1.20%</span><div class="cohort-bar-wrap"><div class="cohort-bar" style="width:100%"></div></div></div>
+      <div id="c7" class="cohort-row"><span class="cohort-name">Disability Income</span><span class="cohort-prob">2.00%</span><div class="cohort-bar-wrap"><div class="cohort-bar" style="width:100%"></div></div></div>
+      <div id="c8" class="cohort-row"><span class="cohort-name">Annuity Pool A</span><span class="cohort-prob">95.0%</span><div class="cohort-bar-wrap"><div class="cohort-bar" style="width:100%"></div></div></div>
+      <div id="c9" class="cohort-row"><span class="cohort-name">Annuity Pool B</span><span class="cohort-prob">80.0%</span><div class="cohort-bar-wrap"><div class="cohort-bar" style="width:100%"></div></div></div>
+      <div id="c10" class="cohort-row"><span class="cohort-name">Group Health</span><span class="cohort-prob">15.0%</span><div class="cohort-bar-wrap"><div class="cohort-bar" style="width:100%"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- S5 · Noir circuit · 39–50s -->
+<div id="s5" class="clip scene" data-track-index="0" data-start="39" data-duration="11">
+  <div class="grid"></div>
+  <div class="corner-tl"></div>
+  <div class="corner-br"></div>
+  <div class="left-col">
+    <div id="s5-label" class="circuit-label">NOIR CIRCUIT</div>
+    <div id="s5-head" class="circuit-head">Private inputs.<br>Public proof.</div>
+    <div id="s5-code" class="code-block">
+      <div class="code-header">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+        <span class="code-title">circuits/src/main.nr</span>
+      </div>
+      <div class="code-body">
+<span class="kw">fn</span> <span class="fn">main</span>(<br>
+&nbsp;&nbsp;<span class="cm">// private: liability table</span><br>
+&nbsp;&nbsp;benefits: [Field; 20],<br>
+&nbsp;&nbsp;probabilities: [Field; 20],<br>
+&nbsp;&nbsp;discounts: [Field; 20],<br>
+&nbsp;&nbsp;<span class="cm">// public: vault balance</span><br>
+&nbsp;&nbsp;total_reserves: <span class="kw">pub</span> Field,<br>
+&nbsp;&nbsp;liability_commitment: <span class="kw">pub</span> Field,<br>
+) {<br>
+&nbsp;&nbsp;<span class="cm">// assert reserves ≥ EPV</span><br>
+&nbsp;&nbsp;<span class="kw">let</span> diff = lhs - epv;<br>
+&nbsp;&nbsp;<span class="kw">let</span> _ = diff <span class="kw">as</span> u64;<br>
+}
+      </div>
+    </div>
+  </div>
+  <div class="right-col">
+    <div id="s5-badge" class="proof-badge">
+      <span class="proof-icon">🔐</span>
+      <div class="proof-text">
+        <div class="proof-title">UltraHonk Proof</div>
+        <div class="proof-meta">~3.8 KB · BN254 curve · bb.js backend</div>
+      </div>
+    </div>
+    <div id="s5-flow" style="display:flex;flex-direction:column;gap:16px;will-change:opacity,transform">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px 24px">
+        <div style="font-size:14px;color:var(--dim);letter-spacing:2px;margin-bottom:8px">PRIVATE WITNESS</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--dim)">10 cohorts · benefits · probs · PV factors</div>
+      </div>
+      <div style="text-align:center;font-size:28px;color:var(--blue)">↓</div>
+      <div style="background:rgba(14,165,233,0.08);border:2px solid var(--blue);border-radius:10px;padding:20px 24px">
+        <div style="font-size:14px;color:var(--blue);letter-spacing:2px;margin-bottom:8px">ZK PROOF</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--blue);word-break:break-all;opacity:0.7">π = [0x1a2b3c...f7e8d9, 0x4f5a6b...c3d2e1]</div>
+      </div>
+      <div style="text-align:center;font-size:28px;color:var(--blue)">↓</div>
+      <div style="background:rgba(34,197,94,0.08);border:2px solid #22c55e;border-radius:10px;padding:20px 24px">
+        <div style="font-size:14px;color:#22c55e;letter-spacing:2px;margin-bottom:8px">PUBLIC OUTPUT</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#22c55e">reserves ≥ EPV ✓</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S6 · Stellar deploy · 50–63s -->
+<div id="s6" class="clip scene" data-track-index="0" data-start="50" data-duration="13">
+  <div class="grid"></div>
+  <div class="corner-tl"></div>
+  <div class="corner-br"></div>
+  <div class="content-block">
+    <div class="left-col">
+      <div id="s6-label" class="stellar-label">SOROBAN CONTRACT</div>
+      <div id="s6-head" class="stellar-head">On-chain<br><span style="color:var(--blue)">verification.</span></div>
+      <div id="s6-sub" class="stellar-sub">Stellar Protocol 26 BN254 host functions verify the UltraHonk proof natively — no off-chain trust needed.</div>
+      <div id="s6-contract" class="contract-card">
+        <div class="contract-label">CONTRACT ID · STELLAR TESTNET</div>
+        <div class="contract-id">C883CFC35D09FD5407EE8593E08B2DE5<br>411A696D4812543ACEF89F755FA2E436F</div>
+      </div>
+      <div id="s6-stamp" class="live-stamp">
+        <span class="live-dot"></span> LIVE ON STELLAR TESTNET
+      </div>
+    </div>
+    <div class="right-col">
+      <div id="s6-frame" class="explorer-frame" style="padding:32px">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--dim);margin-bottom:20px;letter-spacing:2px">stellar.expert / testnet / contract</div>
+        <div style="font-size:18px;font-weight:700;color:var(--fg);margin-bottom:24px">ZkReserveContract</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)">
+            <span style="font-size:15px;color:var(--dim)">verify_reserve()</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#22c55e">✓ callable</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)">
+            <span style="font-size:15px;color:var(--dim)">attestation_count()</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--blue)">→ u32</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)">
+            <span style="font-size:15px;color:var(--dim)">latest_attestation()</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--blue)">→ Attestation</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:14px 0">
+            <span style="font-size:15px;color:var(--dim)">WASM size</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--gold)">3,061 bytes</span>
+          </div>
+        </div>
+        <div style="margin-top:24px;padding:16px 20px;background:rgba(14,165,233,0.08);border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--blue)">
+          Upload tx: 3f9cda97ab17a1fb...<br>Deploy tx: 325dd2b1453fd686...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S7 · Immutable attestation · 63–72s -->
+<div id="s7" class="clip scene" data-track-index="0" data-start="63" data-duration="9">
+  <div class="grid"></div>
+  <div class="corner-tl"></div>
+  <div class="corner-br"></div>
+  <div style="position:absolute;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(14,165,233,0.1) 0%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+    <div class="content-block" style="text-align:center;padding:80px 160px;display:flex;flex-direction:column;align-items:center;gap:36px">
+      <div id="s7-label" class="onchain-label">ON-CHAIN ATTESTATION</div>
+      <div id="s7-head" class="onchain-head">Auditable by anyone.<br><span style="color:var(--blue)">Exposing nothing.</span></div>
+      <div id="s7-hashes" class="hash-row">
+        <div class="hash-card">
+          <div class="hash-card-label">UPLOAD TX</div>
+          <div class="hash-card-val">3f9cda97ab17a1fb2ba902b9f1df36d23a8d5277fe8500ae03e4c2b6b0082842</div>
+        </div>
+        <div class="hash-card">
+          <div class="hash-card-label">DEPLOY TX</div>
+          <div class="hash-card-val">325dd2b1453fd686381622f789bf8506b7c7035cde71f3c9d8997cb0bf63eb13</div>
+        </div>
+      </div>
+      <div id="s7-sub" class="onchain-sub">The vault balance and liability commitment are public. The liability table is not.</div>
+    </div>
+  </div>
+</div>
+
+<!-- S8 · Stats · 72–81s -->
+<div id="s8" class="clip scene" data-track-index="0" data-start="72" data-duration="9">
+  <div class="grid"></div>
+  <div class="corner-tl"></div>
+  <div class="corner-br"></div>
+  <div class="content-block">
+    <div class="left-col">
+      <div id="s8-label" class="stats-label">BY THE NUMBERS</div>
+      <div id="s8-head" class="stats-head">Built. Deployed.<br>Verifiable.</div>
+      <div id="s8-stats" class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-num gold">3K</div>
+          <div class="stat-unit">WASM bytes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">10</div>
+          <div class="stat-unit">policy cohorts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num white">1</div>
+          <div class="stat-unit">ZK proof</div>
+        </div>
+      </div>
+    </div>
+    <div class="right-col">
+      <div id="s8-stack" class="tech-stack">
+        <div class="tech-row">
+          <span class="tech-icon">🔮</span>
+          <div><div class="tech-name">Noir</div><div class="tech-desc">Reserve adequacy ZK circuit</div></div>
+        </div>
+        <div class="tech-row">
+          <span class="tech-icon">⚡</span>
+          <div><div class="tech-name">bb.js</div><div class="tech-desc">UltraHonk proof generation</div></div>
+        </div>
+        <div class="tech-row">
+          <span class="tech-icon">🌟</span>
+          <div><div class="tech-name">Soroban</div><div class="tech-desc">On-chain proof verifier (Rust)</div></div>
+        </div>
+        <div class="tech-row">
+          <span class="tech-icon">📐</span>
+          <div><div class="tech-name">Actuarial EPV</div><div class="tech-desc">Fixed-point arithmetic, 6 decimals</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S9 · Close · 81–92s -->
+<div id="s9" class="clip scene" data-track-index="0" data-start="81" data-duration="11">
+  <div class="grid"></div>
+  <div class="glow-c"></div>
+  <div class="corner-tl"></div>
+  <div class="corner-br"></div>
+  <div id="s9-ring1" class="orbit-ring" style="width:800px;height:800px"></div>
+  <div id="s9-ring2" class="orbit-ring" style="width:560px;height:560px"></div>
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+    <div class="close-block">
+      <div id="s9-logo">ZK RESERVE</div>
+      <div id="s9-tag">Actuarial reserve attestation for the era of verifiable finance.</div>
+      <div id="s9-sub">Zero Knowledge · Soroban · Stellar Testnet</div>
+      <div id="s9-badge">🏆 Stellar Hacks: Real-World ZK · 2026</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /root -->
+
+<script>
+(function() {
+  'use strict';
+  window.__timelines = window.__timelines || {};
+  var tl = gsap.timeline({ paused: true });
+
+  /* S1 · Hook */
+  tl.from('#s1-num',    { duration:0.9, scale:0.4, opacity:0, ease:'power4.out' }, 0.1);
+  tl.from('#s1-label',  { duration:0.6, y:20, opacity:0, ease:'power2.out' }, 0.9);
+  tl.from('#s1-sub',    { duration:0.7, y:28, opacity:0, ease:'power2.out' }, 1.4);
+  tl.to('#s1-scanline', { duration:3.5, top:'0px', ease:'none', repeat:-1 }, 0);
+
+  /* S2 · Problem / Solution */
+  tl.from('#s2-plabel',  { duration:0.5, opacity:0 }, 5.2);
+  tl.from('#s2-phead',   { duration:0.7, x:-60, opacity:0, ease:'power3.out' }, 5.6);
+  tl.from('#s2-table',   { duration:0.6, y:30, opacity:0, ease:'power2.out' }, 6.3);
+  tl.from('#s2-verdict', { duration:0.5, scale:0.85, opacity:0, ease:'back.out(1.5)' }, 7.2);
+  tl.from('#s2-slabel',  { duration:0.5, opacity:0 }, 8.5);
+  tl.from('#s2-shead',   { duration:0.7, x:60, opacity:0, ease:'power3.out' }, 8.9);
+  tl.from(['#s2-i1','#s2-i2','#s2-i3'], { duration:0.5, x:40, opacity:0, stagger:0.22, ease:'power2.out' }, 9.6);
+
+  /* S3 · Brand */
+  tl.from('#s3-wordmark', { duration:1.0, scale:0.5, opacity:0, ease:'power4.out' }, 17.3);
+  tl.to('#s3-accent',     { duration:0.7, width:480, ease:'power2.out' }, 18.2);
+  tl.from('#s3-tag',      { duration:0.6, y:24, opacity:0, ease:'power2.out' }, 18.8);
+  tl.from('#s3-sub',      { duration:0.6, y:20, opacity:0, ease:'power2.out' }, 19.4);
+  tl.to('#s3-ring1', { duration:8, rotation:360, ease:'none', repeat:-1, transformOrigin:'center center' }, 17);
+  tl.to('#s3-ring2', { duration:5, rotation:-360, ease:'none', repeat:-1, transformOrigin:'center center' }, 17);
+
+  /* S4 · Math */
+  tl.from('#s4-label',   { duration:0.5, opacity:0 }, 27.2);
+  tl.from('#s4-head',    { duration:0.7, x:-50, opacity:0, ease:'power3.out' }, 27.6);
+  tl.from('#s4-formula', { duration:0.7, y:30, opacity:0, ease:'power2.out' }, 28.3);
+  tl.from(['#c1','#c2','#c3','#c4','#c5','#c6','#c7','#c8','#c9','#c10'],
+    { duration:0.4, x:40, opacity:0, stagger:0.1, ease:'power2.out' }, 28.6);
+
+  /* S5 · Noir */
+  tl.from('#s5-label', { duration:0.5, opacity:0 }, 39.2);
+  tl.from('#s5-head',  { duration:0.7, x:-50, opacity:0, ease:'power3.out' }, 39.6);
+  tl.from('#s5-code',  { duration:0.7, y:30, opacity:0, ease:'power2.out' }, 40.2);
+  tl.from('#s5-badge', { duration:0.6, scale:0.8, opacity:0, ease:'back.out(1.5)' }, 40.8);
+  tl.from('#s5-flow',  { duration:0.6, x:40, opacity:0, ease:'power2.out' }, 41.5);
+
+  /* S6 · Stellar */
+  tl.from('#s6-label',    { duration:0.5, opacity:0 }, 50.2);
+  tl.from('#s6-head',     { duration:0.7, y:40, opacity:0, ease:'power3.out' }, 50.6);
+  tl.from('#s6-sub',      { duration:0.6, y:24, opacity:0, ease:'power2.out' }, 51.2);
+  tl.from('#s6-contract', { duration:0.6, y:20, opacity:0, ease:'power2.out' }, 51.8);
+  tl.from('#s6-stamp',    { duration:0.6, scale:0.8, opacity:0, ease:'back.out(1.5)' }, 52.5);
+  tl.from('#s6-frame',    { duration:0.8, x:60, opacity:0, ease:'power3.out' }, 50.4);
+
+  /* S7 · Attestation */
+  tl.from('#s7-label',  { duration:0.5, opacity:0 }, 63.2);
+  tl.from('#s7-head',   { duration:0.8, scale:0.85, opacity:0, ease:'power3.out' }, 63.6);
+  tl.from('#s7-hashes', { duration:0.6, y:30, opacity:0, ease:'power2.out' }, 64.5);
+  tl.from('#s7-sub',    { duration:0.6, y:20, opacity:0, ease:'power2.out' }, 65.2);
+
+  /* S8 · Stats */
+  tl.from('#s8-label', { duration:0.5, opacity:0 }, 72.2);
+  tl.from('#s8-head',  { duration:0.7, y:36, opacity:0, ease:'power3.out' }, 72.6);
+  tl.from('#s8-stats', { duration:0.6, scale:0.88, opacity:0, ease:'back.out(1.4)' }, 73.3);
+  tl.from('#s8-stack', { duration:0.6, x:50, opacity:0, ease:'power3.out' }, 73.0);
+
+  /* S9 · Close */
+  tl.from('#s9-logo',  { duration:1.1, scale:0.35, opacity:0, ease:'power4.out' }, 81.3);
+  tl.from('#s9-tag',   { duration:0.7, y:32, opacity:0, ease:'power2.out' }, 82.3);
+  tl.from('#s9-sub',   { duration:0.6, y:20, opacity:0, ease:'power2.out' }, 83.0);
+  tl.from('#s9-badge', { duration:0.7, scale:0.7, opacity:0, ease:'back.out(1.4)' }, 83.7);
+  tl.to('#s9-ring1', { duration:10, rotation:360, ease:'none', repeat:-1, transformOrigin:'center center' }, 81);
+  tl.to('#s9-ring2', { duration:6, rotation:-360, ease:'none', repeat:-1, transformOrigin:'center center' }, 81);
+
+  window.__timelines['zk-reserve-demo'] = tl;
+}());
+</script>
+</body>
+</html>

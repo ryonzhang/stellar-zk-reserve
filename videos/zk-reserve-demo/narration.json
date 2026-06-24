@@ -1,0 +1,40 @@
+{
+  "scenes": [
+    {
+      "id": "s1_hook",
+      "text": "Seven trillion dollars in insurance reserves. Proven every year by handing over everything."
+    },
+    {
+      "id": "s2_problem",
+      "text": "Regulators demand the full liability table — policy counts, benefit amounts, claim probabilities. Every reserve audit exposes confidential data. There is no privacy in today's actuarial compliance."
+    },
+    {
+      "id": "s3_solution",
+      "text": "ZK Reserve changes that. A zero-knowledge proof that your vault is solvent — without revealing a single line of the liability table."
+    },
+    {
+      "id": "s4_math",
+      "text": "The circuit encodes the actuarial Expected Present Value formula across ten policy cohorts — term life, annuities, disability, critical illness — all in fixed-point arithmetic. The math runs in zero knowledge."
+    },
+    {
+      "id": "s5_noir",
+      "text": "A Noir circuit takes the private liability table as witness and vault reserves as public input. It generates a compact UltraHonk proof — under four kilobytes — that reserve adequacy holds."
+    },
+    {
+      "id": "s6_stellar",
+      "text": "That proof is submitted to a Soroban smart contract on Stellar testnet. The verifier checks the UltraHonk proof using Stellar's native BN254 host functions — introduced in Protocol 26 — and stores the attestation permanently on-chain."
+    },
+    {
+      "id": "s7_onchain",
+      "text": "The result: an immutable attestation. Proof of solvency — auditable by anyone, exposing nothing to anyone."
+    },
+    {
+      "id": "s8_stats",
+      "text": "Three-thousand-byte WASM contract. Ten actuarial cohorts. One proof. Deployed live on Stellar testnet."
+    },
+    {
+      "id": "s9_close",
+      "text": "ZK Reserve. Actuarial reserve attestation for the era of verifiable finance. Built for Stellar Hacks 2026."
+    }
+  ]
+}
