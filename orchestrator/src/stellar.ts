@@ -2,13 +2,12 @@
 import {
   Keypair,
   Networks,
-  SorobanRpc,
+  rpc as SorobanRpc,
   TransactionBuilder,
   Contract,
   BASE_FEE,
   xdr,
   nativeToScVal,
-  scValToNative,
 } from '@stellar/stellar-sdk';
 
 const RPC_URL = 'https://soroban-testnet.stellar.org';

@@ -2,6 +2,15 @@
 
 > Prove an insurance vault meets actuarial reserve requirements **without revealing the liability table.**
 
+## Deployed Contract (Stellar Testnet)
+
+| | |
+|---|---|
+| **Contract ID** | `C883CFC35D09FD5407EE8593E08B2DE5411A696D4812543ACEF89F755FA2E436F` |
+| **Explorer** | https://stellar.expert/explorer/testnet/contract/883cfc35d09fd5407ee8593e08b2de5411a696d4812543acef89f755fa2e436f |
+| **Upload tx** | `3f9cda97ab17a1fb2ba902b9f1df36d23a8d5277fe8500ae03e4c2b6b0082842` |
+| **Deploy tx** | `325dd2b1453fd686381622f789bf8506b7c7035cde71f3c9d8997cb0bf63eb13` |
+
 ## The Problem
 
 Insurance regulators require proof that an insurer's vault holds enough reserves to cover expected claims. Today, this means handing over the full liability table — exposing proprietary pricing data and policyholder information.
